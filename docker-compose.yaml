@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: movie_db
+      MYSQL_USER: movie_user
+      MYSQL_PASSWORD: movie_password
+    volumes:
+      - db_data:/var/lib/mysql # Persist data in a named volume
+    ports:
+      - "3306:3306" # Expose MySQL port (optional, for direct host access)
+    networks:
+      - app-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin_ui
+    depends_on:
+      - db # Ensure MySQL starts before phpMyAdmin
+    environment:
+      PMA_HOST: db # Connect to the MySQL service by its service name
+      MYSQL_ROOT_PASSWORD: root # Use the same root password as MySQL
+    ports:
+      - "8080:80" # Access phpMyAdmin via host port 8080
+    networks:
+      - app-network
+
+volumes:
+  db_data: # Define the named volume for MySQL data persistence
+
+networks:
+  app-network: # Define a custom network for inter-service communication
+    driver: bridge
