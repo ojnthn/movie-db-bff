@@ -1,31 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { CreateFilmeDto } from './dto/create-filme.dto';
-import { UpdateFilmeDto } from './dto/update-filme.dto';
-import { Filme } from './entities/filme.entity';
+import { RestClientService } from 'src/core/shared/rest_client/rest_client.service';
+import { FilmeResponseDto } from './dto/filme_response.dto';
+import { FilmesResponseInterface, FilmesResponseItemInterface } from './interfaces/filmes_response.interface';
+import { FilmesConstants } from './constants/filmes.constants';
 
 @Injectable()
 export class FilmesService {
-  create(createFilmeDto: CreateFilmeDto) {
-    return 'This action adds a new filme';
+  constructor(private readonly restClientService: RestClientService) { }
+
+  async findAll(): Promise<FilmeResponseDto[]> {
+    const response = await this.restClientService.get<FilmesResponseInterface>(FilmesConstants.discoverMovies);
+
+    return FilmeResponseDto.fromInterfaceArray(response);
   }
 
-  findAll() {
-    return [
-      Filme.fromJSON({ id: 1, titulo: 'Inception', diretor: 'Christopher Nolan', anoLancamento: 2010, genero: 'Sci-Fi' }),
-      Filme.fromJSON({ id: 2, titulo: 'The Godfather', diretor: 'Francis Ford Coppola', anoLancamento: 1972, genero: 'Crime' }),
-      Filme.fromJSON({ id: 3, titulo: 'Pulp Fiction', diretor: 'Quentin Tarantino', anoLancamento: 1994, genero: 'Crime' }),
-    ];
-  }
+  async findOne(id: number): Promise<FilmeResponseDto> {
+    const response = await this.restClientService.get<FilmesResponseItemInterface>(FilmesConstants.movieDetails(id));
 
-  findOne(id: number) {
-    return `This action returns a #${id} filme`;
-  }
-
-  update(id: number, updateFilmeDto: UpdateFilmeDto) {
-    return `This action updates a #${id} filme`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} filme`;
+    return FilmeResponseDto.fromJson(response);
   }
 }
